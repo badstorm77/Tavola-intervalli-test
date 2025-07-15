@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f111a" />
+  <meta name="description" content="Estrattore di intervalli e toniche per esercizi musicali" />
+  <link rel="icon" href="icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Tavola degli intervalli</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: #0f111a;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .page-header {
+      width: 100vw;
+      background-color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      box-sizing: border-box;
+      flex-wrap: wrap;
+    }
+
+    .logo { height: 60px; object-fit: contain; }
+    .speaker-icon { height: 40px; cursor: pointer; }
+
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #0f111a;
+      text-align: center;
+      flex: 1;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      padding: 20px;
+    }
+
+    button {
+      background-color: #5c5eff;
+      border: none;
+      color: #fff;
+      padding: 20px 50px;
+      font-size: 1.5rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      font-family: Arial, sans-serif;
+    }
+
+    button:hover { background-color: #7b7dff; }
+
+    .fullscreen-button {
+      background-color: #2e323d;
+      color: #fff;
+      padding: 12px 24px;
+      font-size: 1.2rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-family: Arial, sans-serif;
+    }
+    .fullscreen-button:hover { background-color: #3e4455; }
+
+    .output {
+      font-size: clamp(3rem, 10vw, 11rem);
+      padding: 50px;
+      border-radius: 16px;
+      background-color: #1a1c25;
+      min-width: 300px;
+      text-align: center;
+      opacity: 0;
+      transform: scale(0.7);
+      transition: all 0.3s ease-in-out;
+      font-family: Arial, sans-serif;
+    }
+
+    .output.show {
+      opacity: 1;
+      transform: scale(1);
+      animation: blinkFade 0.4s ease;
+    }
+
+    .output.audio-active {
+      box-shadow: 0 0 25px 8px #5c5eff;
+      transition: box-shadow 0.3s ease;
+    }
+
+    @keyframes blinkFade {
+      0% { background-color: #1a1c25; }
+      25% { background-color: #2a2d38; }
+      50% { background-color: #3a3e4d; }
+      75% { background-color: #2a2d38; }
+      100% { background-color: #1a1c25; }
+    }
+
+    .top-controls, .bpm-control {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    select {
+      padding: 12px 24px;
+      font-size: 1.2rem;
+      background-color: #2a2e3d;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: Arial, sans-serif;
+    }
+
+    .bpm-control button {
+      background-color: #2a2e3d;
+      color: #fff;
+      padding: 10px 16px;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      border: none;
+      font-family: Arial, sans-serif;
+    }
+    .bpm-control button:hover { background-color: #3e4455; }
+
+    .bpm-display {
+      font-size: 1.2rem;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    .tempo-button {
+      background-color: #2e323d;
+      padding: 4px 14px;
+      font-size: 0.8rem;
+      border-radius: 12px;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-family: Arial, sans-serif;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    .tempo-button.active { background-color: #5c5eff; }
+    .tempo-button:hover { background-color: #7b7dff; }
+
+    @media (max-width: 768px) {
+      .output { font-size: 6rem; }
+      .logo { height: 40px; }
+      .speaker-icon { height: 30px; }
+    }
+
+    @media (max-width: 480px) {
+      .output { font-size: 3rem; }
+      button, select { font-size: 1rem; padding: 10px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <img src="./VSA.png" alt="Logo VSA" class="logo">
+    <div class="page-title">Tavola degli intervalli</div>
+    <img src="./Speaker_off.svg" id="speaker-icon" alt="Speaker" class="speaker-icon" onclick="toggleSpeaker()">
+  </div>
+  <main>
+    <div class="top-controls">
+      <select id="lista">
+        <option value="naturali">Intervalli Naturali</option>
+        <option value="armonici">Intervalli Naturali e Alterati</option>
+        <option value="toniche">Toniche</option>
+      </select>
+      <button class="fullscreen-button" id="fullscreen-btn" onclick="toggleFullscreen()">Full screen</button>
+    </div>
+    <div class="output" id="output"></div>
+    <button onclick="estraiElemento()">Chiedimi</button>
+    <div class="bpm-control">
+      <button onclick="modificaBPM(-1)">-</button>
+      <span class="bpm-display" id="bpm">20 bpm</span>
+      <button onclick="modificaBPM(1)">+</button>
+      <button class="tempo-button" id="tempo-btn" onclick="toggleTempo()">Chiedimi a tempo</button>
+    </div>
+  </main>
+
+  <script>
+    let speakerOn = false;
+    let bpm = 20;
+    let timer = null;
+    let audioPlayer = new Audio();
+    let context = null;
+
+    window.addEventListener("touchstart", () => {
+      if (!context) {
+        context = new (window.AudioContext || window.webkitAudioContext)();
+        const source = context.createBufferSource();
+        source.buffer = context.createBuffer(1, 1, 22050);
+        source.connect(context.destination);
+        source.start(0);
+      }
+    }, { once: true });
+
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      const fsBtn = document.getElementById("fullscreen-btn");
+      if (fsBtn) fsBtn.style.display = "none";
+    }
+
+    const fileMap = {
+      "𝟷": "1.ogg", "𝟸": "2.ogg", "𝟹": "3.ogg", "𝟺": "4.ogg", "𝟻": "5.ogg", "𝟼": "6.ogg", "𝟽": "7.ogg", "𝟾": "8.ogg", "𝟿": "9.ogg",
+      "𝟷𝟷": "11.ogg", "𝟷𝟹": "13.ogg", "𝟸#": "2sharp.ogg", "𝟸𝚋": "2b.ogg", "𝟹𝚋": "3b.ogg", "𝟺#": "4sharp.ogg",
+      "𝟻𝚋": "5b.ogg", "𝟻#": "5sharp.ogg", "𝟼𝚋": "6b.ogg", "𝟼#": "6sharp.ogg", "𝟽𝚋": "7b.ogg",
+      "𝟷𝟹𝚋": "13b.ogg", "𝟷𝟹#": "13sharp.ogg", "𝟿𝚋": "9b.ogg", "𝟷𝟷#": "11sharp.ogg", "𝟿#": "9sharp.ogg",
+      "𝙲": "C.ogg", "𝙳♭": "Db.ogg", "𝙳": "D.ogg", "𝙴♭": "Eb.ogg", "𝙴": "E.ogg", "𝙵": "F.ogg",
+      "𝙶♭": "Gb.ogg", "𝙶": "G.ogg", "𝙰♭": "Ab.ogg", "𝙰": "A.ogg", "𝙱♭": "Bb.ogg", "𝙱": "b.ogg"
+    };
+
+    const tempoBtn = document.getElementById("tempo-btn");
+    const history = { naturali: [], armonici: [], toniche: [] };
+
+    function toggleSpeaker() {
+      const icon = document.getElementById("speaker-icon");
+      speakerOn = !speakerOn;
+      icon.src = speakerOn ? "./Speaker_on.svg" : "./Speaker_off.svg";
+    }
+
+    function estraiElemento() {
+      const output = document.getElementById("output");
+      output.classList.remove("show", "audio-active");
+      void output.offsetWidth;
+
+      const lista = document.getElementById("lista").value;
+      const elementi = {
+        naturali: ["𝟷", "𝟸", "𝟹", "𝟺", "𝟻", "𝟼", "𝟽", "𝟾", "𝟿", "𝟷𝟷", "𝟷𝟹"],
+        armonici: ["𝟷", "𝟸", "𝟹", "𝟺", "𝟻", "𝟼", "𝟽", "𝟾", "𝟿", "𝟷𝟷", "𝟷𝟹", "𝟸#", "𝟸𝚋", "𝟹𝚋", "𝟺#", "𝟻𝚋", "𝟻#", "𝟼𝚋", "𝟼#", "𝟽𝚋", "𝟷𝟹𝚋", "𝟷𝟹#", "𝟿𝚋", "𝟷𝟷#", "𝟿#"],
+        toniche: ["𝙲", "𝙳♭", "𝙳", "𝙴♭", "𝙴", "𝙵", "𝙶♭", "𝙶", "𝙰♭", "𝙰", "𝙱♭", "𝙱"]
+      };
+
+      if (history[lista].length === elementi[lista].length) history[lista] = [];
+
+      let estratto;
+      do {
+        estratto = elementi[lista][Math.floor(Math.random() * elementi[lista].length)];
+      } while (history[lista].includes(estratto));
+
+      history[lista].push(estratto);
+
+      output.textContent = estratto;
+      output.classList.add("show");
+
+      if (speakerOn) {
+        output.classList.add("audio-active");
+        const fileName = fileMap[estratto] || `${estratto}.ogg`;
+        audioPlayer.pause();
+        audioPlayer.currentTime = 0;
+        audioPlayer.src = `audio/${fileName}`;
+        audioPlayer.play().catch(() => {});
+      }
+    }
+
+    function modificaBPM(delta) {
+      bpm = Math.max(10, bpm + delta);
+      document.getElementById("bpm").textContent = `${bpm} bpm`;
+      if (timer !== null) {
+        clearInterval(timer);
+        timer = setInterval(estraiElemento, 60000 / bpm);
+      }
+    }
+
+    function toggleTempo() {
+      if (timer === null) {
+        timer = setInterval(estraiElemento, 60000 / bpm);
+        tempoBtn.classList.add("active");
+      } else {
+        clearInterval(timer);
+        timer = null;
+        tempoBtn.classList.remove("active");
+      }
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
+      } else if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  </script>
+</body>
+</html>
