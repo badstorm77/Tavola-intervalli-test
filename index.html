@@ -194,7 +194,7 @@
     <button onclick="estraiElemento()">Chiedimi</button>
     <div class="bpm-control">
       <button onclick="modificaBPM(-1)">-</button>
-      <span class="bpm-display" id="bpm">20 bpm</span>
+      <span class="bpm-display" id="bpm">30 bpm</span>
       <button onclick="modificaBPM(1)">+</button>
       <button class="tempo-button" id="tempo-btn" onclick="toggleTempo()">Chiedimi a tempo</button>
     </div>
@@ -202,7 +202,7 @@
 
   <script>
     let speakerOn = false;
-    let bpm = 20;
+    let bpm = 30;
     let timer = null;
     let audioPlayer = new Audio();
     let context = null;
