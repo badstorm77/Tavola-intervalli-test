@@ -223,12 +223,12 @@
     }
 
     const fileMap = {
-      "𝟷": "1.ogg", "𝟸": "2.ogg", "𝟹": "3.ogg", "𝟺": "4.ogg", "𝟻": "5.ogg", "𝟼": "6.ogg", "𝟽": "7.ogg", "𝟾": "8.ogg", "𝟿": "9.ogg",
-      "𝟷𝟷": "11.ogg", "𝟷𝟹": "13.ogg", "𝟸#": "2sharp.ogg", "𝟸𝚋": "2b.ogg", "𝟹𝚋": "3b.ogg", "𝟺#": "4sharp.ogg",
-      "𝟻𝚋": "5b.ogg", "𝟻#": "5sharp.ogg", "𝟼𝚋": "6b.ogg", "𝟼#": "6sharp.ogg", "𝟽𝚋": "7b.ogg",
-      "𝟷𝟹𝚋": "13b.ogg", "𝟷𝟹#": "13sharp.ogg", "𝟿𝚋": "9b.ogg", "𝟷𝟷#": "11sharp.ogg", "𝟿#": "9sharp.ogg",
-      "𝙲": "C.ogg", "𝙳♭": "Db.ogg", "𝙳": "D.ogg", "𝙴♭": "Eb.ogg", "𝙴": "E.ogg", "𝙵": "F.ogg",
-      "𝙶♭": "Gb.ogg", "𝙶": "G.ogg", "𝙰♭": "Ab.ogg", "𝙰": "A.ogg", "𝙱♭": "Bb.ogg", "𝙱": "B.ogg"
+      "𝟷": "1.mp3", "𝟸": "2.mp3", "𝟹": "3.mp3", "𝟺": "4.mp3", "𝟻": "5.mp3", "𝟼": "6.mp3", "𝟽": "7.mp3", "𝟾": "8.mp3", "𝟿": "9.mp3",
+      "𝟷𝟷": "11.mp3", "𝟷𝟹": "13.mp3", "𝟸#": "2sharp.mp3", "𝟸𝚋": "2b.mp3", "𝟹𝚋": "3b.mp3", "𝟺#": "4sharp.mp3",
+      "𝟻𝚋": "5b.mp3", "𝟻#": "5sharp.mp3", "𝟼𝚋": "6b.mp3", "𝟼#": "6sharp.mp3", "𝟽𝚋": "7b.mp3",
+      "𝟷𝟹𝚋": "13b.mp3", "𝟷𝟹#": "13sharp.mp3", "𝟿𝚋": "9b.mp3", "𝟷𝟷#": "11sharp.mp3", "𝟿#": "9sharp.mp3",
+      "𝙲": "C.mp3", "𝙳♭": "Db.mp3", "𝙳": "D.mp3", "𝙴♭": "Eb.mp3", "𝙴": "E.mp3", "𝙵": "F.mp3",
+      "𝙶♭": "Gb.mp3", "𝙶": "G.mp3", "𝙰♭": "Ab.mp3", "𝙰": "A.mp3", "𝙱♭": "Bb.mp3", "𝙱": "B.mp3"
     };
 
     const tempoBtn = document.getElementById("tempo-btn");
@@ -266,7 +266,7 @@
 
       if (speakerOn) {
         output.classList.add("audio-active");
-        const fileName = fileMap[estratto] || `${estratto}.ogg`;
+        const fileName = fileMap[estratto] || `${estratto}.mp3`;
         audioPlayer.pause();
         audioPlayer.currentTime = 0;
         audioPlayer.src = `audio/${fileName}`;
