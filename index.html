@@ -21,6 +21,11 @@
       align-items: center;
       justify-content: flex-start;
     }
+    /* Quando è visibile il piano, corpo come flex‐footer */
+body.piano-visible {
+  justify-content: space-between;
+}
+
 
     .page-header {
       width: 100vw;
@@ -187,15 +192,13 @@
 
 /* ===== Immagine di sfondo Piano ===== */
 .piano-image {
-  position: fixed;
-  bottom: 0;
-  left: 0;
   width: 100%;
   height: auto;
   object-fit: contain;
   display: none;
-  z-index: 10;
+  flex-shrink: 0;
 }
+
 </style>
 </head>
 <body>
@@ -260,6 +263,9 @@ function togglePiano() {
     : "./piano_icon_off.svg";
 
   pianoImg.style.display = pianoOn ? "block" : "none";
+    // abilita/disabilita il footer-piano nel layout flex
+  document.body.classList.toggle("piano-visible", pianoOn);
+
 }
 
 
