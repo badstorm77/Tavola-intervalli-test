@@ -173,7 +173,30 @@
       .output { font-size: 3rem; }
       button, select { font-size: 1rem; padding: 10px 16px; }
     }
-  </style>
+  /* ===== Icona Piano ===== */
+.piano-icon {
+  height: 40px;
+  cursor: pointer;
+}
+@media (max-width: 768px) {
+  .piano-icon { height: 30px; }
+}
+@media (max-width: 480px) {
+  .piano-icon { height: 24px; }
+}
+
+/* ===== Immagine di sfondo Piano ===== */
+.piano-image {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: none;
+  z-index: 10;
+}
+</style>
 </head>
 <body>
   <div class="page-header">
@@ -183,7 +206,14 @@
   </div>
   <main>
     <div class="top-controls">
-      <select id="lista">
+      <img
+  src="./piano_icon_off.svg"
+  id="piano-icon"
+  alt="Piano"
+  class="piano-icon"
+  onclick="togglePiano()"
+/>
+<select id="lista">
         <option value="naturali">Intervalli Naturali</option>
         <option value="armonici">Intervalli Naturali e Alterati</option>
         <option value="toniche">Toniche</option>
@@ -200,12 +230,38 @@
     </div>
   </main>
 
-  <script>
+  <img
+  src="./piano_ottave.png"
+  id="piano-image"
+  alt="Piano Ottave"
+  class="piano-image"
+/>
+<script>
     let speakerOn = false;
     let bpm = 22;
     let timer = null;
     let audioPlayer = new Audio();
     let context = null;
+  // Stato icona Piano
+let pianoOn = false;
+// Tiene traccia dell’ultimo elemento estratto
+let lastEstratto = null;
+
+/**
+ * Mostra/nasconde Piano e cambia icona
+ */
+function togglePiano() {
+  pianoOn = !pianoOn;
+  const icon     = document.getElementById("piano-icon");
+  const pianoImg = document.getElementById("piano-image");
+
+  icon.src = pianoOn
+    ? "./piano_icon_on.svg"
+    : "./piano_icon_off.svg";
+
+  pianoImg.style.display = pianoOn ? "block" : "none";
+}
+
 
     window.addEventListener("touchstart", () => {
       if (!context) {
@@ -254,12 +310,22 @@
 
       if (history[lista].length === elementi[lista].length) history[lista] = [];
 
-      let estratto;
-      do {
-        estratto = elementi[lista][Math.floor(Math.random() * elementi[lista].length)];
-      } while (history[lista].includes(estratto));
+  // Nuovo estrattore: evita duplicati di history e uguali al precedente
+  let estratto;
+  do {
+    estratto = elementi[lista][
+      Math.floor(Math.random() * elementi[lista].length)
+    ];
+  } while (
+    history[lista].includes(estratto) ||
+    estratto === lastEstratto
+  );
 
-      history[lista].push(estratto);
+  // Registra in history e aggiorna lastEstratto
+  history[lista].push(estratto);
+  lastEstratto = estratto;
+
+
 
       output.textContent = estratto;
       output.classList.add("show");
