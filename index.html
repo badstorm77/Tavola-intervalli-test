@@ -21,11 +21,6 @@
       align-items: center;
       justify-content: flex-start;
     }
-    /* Quando è visibile il piano, corpo come flex‐footer */
-body.piano-visible {
-  justify-content: space-between;
-}
-
 
     .page-header {
       width: 100vw;
@@ -70,7 +65,6 @@ body.piano-visible {
       transition: background-color 0.2s ease, transform 0.1s ease;
       font-family: Arial, sans-serif;
     }
-
     button:hover { background-color: #7b7dff; }
 
     .fullscreen-button {
@@ -164,7 +158,6 @@ body.piano-visible {
       margin-top: 10px;
       margin-bottom: 10px;
     }
-
     .tempo-button.active { background-color: #5c5eff; }
     .tempo-button:hover { background-color: #7b7dff; }
 
@@ -178,30 +171,27 @@ body.piano-visible {
       .output { font-size: 3rem; }
       button, select { font-size: 1rem; padding: 10px 16px; }
     }
-  /* ===== Icona Piano ===== */
-.piano-icon {
-  height: 40px;
-  cursor: pointer;
-}
-@media (max-width: 768px) {
-  .piano-icon { height: 30px; }
-}
-@media (max-width: 480px) {
-  .piano-icon { height: 24px; }
-}
 
-/* ===== Immagine di sfondo Piano – NON trasparente ===== */
-.piano-image {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-  display: none;
-  flex-shrink: 0;
-  background-color: #0f111a;   /* <-- aggiungi questo */
-}
+    /* ===== Icona Piano ===== */
+    .piano-icon {
+      height: 40px;
+      cursor: pointer;
+    }
+    @media (max-width: 768px) {
+      .piano-icon { height: 30px; }
+    }
+    @media (max-width: 480px) {
+      .piano-icon { height: 24px; }
+    }
 
-
-</style>
+    /* ===== Immagine Piano sotto l'output ===== */
+    .piano-image {
+      display: none;
+      height: auto;
+      margin: 10px auto 0;
+      background-color: #0f111a;
+    }
+  </style>
 </head>
 <body>
   <div class="page-header">
@@ -211,14 +201,8 @@ body.piano-visible {
   </div>
   <main>
     <div class="top-controls">
-      <img
-  src="./piano_icon_off.svg"
-  id="piano-icon"
-  alt="Piano"
-  class="piano-icon"
-  onclick="togglePiano()"
-/>
-<select id="lista">
+      <img src="./piano_icon_off.svg" id="piano-icon" alt="Piano" class="piano-icon" onclick="togglePiano()" />
+      <select id="lista">
         <option value="naturali">Intervalli Naturali</option>
         <option value="armonici">Intervalli Naturali e Alterati</option>
         <option value="toniche">Toniche</option>
@@ -226,6 +210,8 @@ body.piano-visible {
       <button class="fullscreen-button" id="fullscreen-btn" onclick="toggleFullscreen()">Full screen</button>
     </div>
     <div class="output" id="output"></div>
+    <!-- Immagine Piano sotto l'output -->
+    <img src="./piano_ottave.png" id="piano-image" alt="Piano Ottave" class="piano-image" />
     <button onclick="estraiElemento()">Chiedimi</button>
     <div class="bpm-control">
       <button onclick="modificaBPM(-1)">-</button>
@@ -235,41 +221,16 @@ body.piano-visible {
     </div>
   </main>
 
-  <img
-  src="./piano_ottave.png"
-  id="piano-image"
-  alt="Piano Ottave"
-  class="piano-image"
-/>
-<script>
+  <script>
     let speakerOn = false;
     let bpm = 22;
     let timer = null;
     let audioPlayer = new Audio();
     let context = null;
-  // Stato icona Piano
-let pianoOn = false;
-// Tiene traccia dell’ultimo elemento estratto
-let lastEstratto = null;
-
-/**
- * Mostra/nasconde Piano e cambia icona
- */
-function togglePiano() {
-  pianoOn = !pianoOn;
-  const icon     = document.getElementById("piano-icon");
-  const pianoImg = document.getElementById("piano-image");
-
-  icon.src = pianoOn
-    ? "./piano_icon_on.svg"
-    : "./piano_icon_off.svg";
-
-  pianoImg.style.display = pianoOn ? "block" : "none";
-    // abilita/disabilita il footer-piano nel layout flex
-  document.body.classList.toggle("piano-visible", pianoOn);
-
-}
-
+    // Stato icona Piano
+    let pianoOn = false;
+    // Tiene traccia dell’ultimo elemento estratto
+    let lastEstratto = null;
 
     window.addEventListener("touchstart", () => {
       if (!context) {
@@ -288,11 +249,7 @@ function togglePiano() {
 
     const fileMap = {
       "𝟷": "1.mp3", "𝟸": "2.mp3", "𝟹": "3.mp3", "𝟺": "4.mp3", "𝟻": "5.mp3", "𝟼": "6.mp3", "𝟽": "7.mp3", "𝟾": "8.mp3", "𝟿": "9.mp3",
-      "𝟷𝟷": "11.mp3", "𝟷𝟹": "13.mp3", "𝟸#": "2sharp.mp3", "𝟸𝚋": "2b.mp3", "𝟹𝚋": "3b.mp3", "𝟺#": "4sharp.mp3",
-      "𝟻𝚋": "5b.mp3", "𝟻#": "5sharp.mp3", "𝟼𝚋": "6b.mp3", "𝟼#": "6sharp.mp3", "𝟽𝚋": "7b.mp3",
-      "𝟷𝟹𝚋": "13b.mp3", "𝟷𝟹#": "13sharp.mp3", "𝟿𝚋": "9b.mp3", "𝟷𝟷#": "11sharp.mp3", "𝟿#": "9sharp.mp3",
-      "𝙲": "C.mp3", "𝙳♭": "Db.mp3", "𝙳": "D.mp3", "𝙴♭": "Eb.mp3", "𝙴": "E.mp3", "𝙵": "F.mp3",
-      "𝙶♭": "Gb.mp3", "𝙶": "G.mp3", "𝙰♭": "Ab.mp3", "𝙰": "A.mp3", "𝙱♭": "Bb.mp3", "𝙱": "B.mp3"
+      "𝟷𝟷": "11.mp3", "𝟷𝟸": "12.mp3", /* etc… */
     };
 
     const tempoBtn = document.getElementById("tempo-btn");
@@ -311,40 +268,32 @@ function togglePiano() {
 
       const lista = document.getElementById("lista").value;
       const elementi = {
-        naturali: ["𝟷", "𝟸", "𝟹", "𝟺", "𝟻", "𝟼", "𝟽", "𝟾", "𝟿", "𝟷𝟷", "𝟷𝟹"],
-        armonici: ["𝟷", "𝟸", "𝟹", "𝟺", "𝟻", "𝟼", "𝟽", "𝟾", "𝟿", "𝟷𝟷", "𝟷𝟹", "𝟸#", "𝟸𝚋", "𝟹𝚋", "𝟺#", "𝟻𝚋", "𝟻#", "𝟼𝚋", "𝟼#", "𝟽𝚋", "𝟷𝟹𝚋", "𝟷𝟹#", "𝟿𝚋", "𝟷𝟷#", "𝟿#"],
-        toniche: ["𝙲", "𝙳♭", "𝙳", "𝙴♭", "𝙴", "𝙵", "𝙶♭", "𝙶", "𝙰♭", "𝙰", "𝙱♭", "𝙱"]
+        naturali: ["𝟷","𝟸","𝟹","𝟺","𝟻","𝟼","𝟽","𝟾","𝟿","𝟷𝟷","𝟷𝟹"],
+        armonici: ["𝟷","𝟸","𝟹","𝟺","𝟻","𝟼","𝟽","𝟾","𝟿","𝟷𝟷","𝟷𝟹","𝟸#","𝟸𝚋","𝟹𝚋","𝟺#","𝟻𝚋","𝟻#","𝟼𝚋","𝟼#","𝟽𝚋","𝟷𝟹𝚋","𝟷𝟹#","𝟿𝚋","𝟷𝟷#","𝟿#"],
+        toniche: ["𝙲","𝙳♭","𝙳","𝙴♭","𝙴","𝙵","𝙶♭","𝙶","𝙰♭","𝙰","𝙱♭","𝙱"]
       };
 
       if (history[lista].length === elementi[lista].length) history[lista] = [];
 
-  // Nuovo estrattore: evita duplicati di history e uguali al precedente
-  let estratto;
-  do {
-    estratto = elementi[lista][
-      Math.floor(Math.random() * elementi[lista].length)
-    ];
-  } while (
-    history[lista].includes(estratto) ||
-    estratto === lastEstratto
-  );
+      let estratto;
+      do {
+        estratto = elementi[lista][Math.floor(Math.random() * elementi[lista].length)];
+      } while (history[lista].includes(estratto) || estratto === lastEstratto);
 
-  // Registra in history e aggiorna lastEstratto
-  history[lista].push(estratto);
-  lastEstratto = estratto;
+      history[lista].push(estratto);
+      lastEstratto = estratto;
 
-
-
-      output.textContent = estratto;
-      output.classList.add("show");
+      const outputDiv = document.getElementById("output");
+      outputDiv.textContent = estratto;
+      outputDiv.classList.add("show");
 
       if (speakerOn) {
-        output.classList.add("audio-active");
+        outputDiv.classList.add("audio-active");
         const fileName = fileMap[estratto] || `${estratto}.mp3`;
         audioPlayer.pause();
         audioPlayer.currentTime = 0;
         audioPlayer.src = `audio/${fileName}`;
-        audioPlayer.play().catch(() => {});
+        audioPlayer.play().catch(()=>{});
       }
     }
 
