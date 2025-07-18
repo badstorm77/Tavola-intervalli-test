@@ -232,6 +232,27 @@
     // Tiene traccia dell’ultimo elemento estratto
     let lastEstratto = null;
 
+    function toggleSpeaker() {
+      const icon = document.getElementById("speaker-icon");
+      speakerOn = !speakerOn;
+      icon.src = speakerOn ? "./Speaker_on.svg" : "./Speaker_off.svg";
+    }
+
+    // Definizione mancante di togglePiano per evitare ReferenceError
+    function togglePiano() {
+      pianoOn = !pianoOn;
+      const icon = document.getElementById("piano-icon");
+      const pianoImg = document.getElementById("piano-image");
+      icon.src = pianoOn ? "./piano_icon_on.svg" : "./piano_icon_off.svg";
+      if (pianoOn) {
+        const outputEl = document.getElementById("output");
+        pianoImg.style.display = "block";
+        pianoImg.style.width = `${outputEl.offsetWidth}px`;
+      } else {
+        pianoImg.style.display = "none";
+      }
+    }
+
     window.addEventListener("touchstart", () => {
       if (!context) {
         context = new (window.AudioContext || window.webkitAudioContext)();
@@ -248,47 +269,34 @@
     }
 
     const fileMap = {
-      "𝟷": "1.mp3", "𝟸": "2.mp3", "𝟹": "3.mp3", "𝟺": "4.mp3", "𝟻": "5.mp3", "𝟼": "6.mp3", "𝟽": "7.mp3", "𝟾": "8.mp3", "𝟿": "9.mp3",
-      "𝟷𝟷": "11.mp3", "𝟷𝟸": "12.mp3", /* etc… */
+      "𝟷": "1.mp3", "𝟸": "2.mp3", "𝟹": "3.mp3", "𝟺": "4.mp3", "𝟻": "5.mp3", "𝟼": "6.mp3",
+      "𝟽": "7.mp3", "𝟾": "8.mp3", "𝟿": "9.mp3", "𝟷𝟷": "11.mp3", "𝟷𝟸": "12.mp3"
     };
 
     const tempoBtn = document.getElementById("tempo-btn");
     const history = { naturali: [], armonici: [], toniche: [] };
 
-    function toggleSpeaker() {
-      const icon = document.getElementById("speaker-icon");
-      speakerOn = !speakerOn;
-      icon.src = speakerOn ? "./Speaker_on.svg" : "./Speaker_off.svg";
-    }
-
     function estraiElemento() {
       const output = document.getElementById("output");
       output.classList.remove("show", "audio-active");
       void output.offsetWidth;
-
       const lista = document.getElementById("lista").value;
       const elementi = {
         naturali: ["𝟷","𝟸","𝟹","𝟺","𝟻","𝟼","𝟽","𝟾","𝟿","𝟷𝟷","𝟷𝟹"],
         armonici: ["𝟷","𝟸","𝟹","𝟺","𝟻","𝟼","𝟽","𝟾","𝟿","𝟷𝟷","𝟷𝟹","𝟸#","𝟸𝚋","𝟹𝚋","𝟺#","𝟻𝚋","𝟻#","𝟼𝚋","𝟼#","𝟽𝚋","𝟷𝟹𝚋","𝟷𝟹#","𝟿𝚋","𝟷𝟷#","𝟿#"],
         toniche: ["𝙲","𝙳♭","𝙳","𝙴♭","𝙴","𝙵","𝙶♭","𝙶","𝙰♭","𝙰","𝙱♭","𝙱"]
       };
-
       if (history[lista].length === elementi[lista].length) history[lista] = [];
-
       let estratto;
       do {
         estratto = elementi[lista][Math.floor(Math.random() * elementi[lista].length)];
       } while (history[lista].includes(estratto) || estratto === lastEstratto);
-
       history[lista].push(estratto);
       lastEstratto = estratto;
-
-      const outputDiv = document.getElementById("output");
-      outputDiv.textContent = estratto;
-      outputDiv.classList.add("show");
-
+      output.textContent = estratto;
+      output.classList.add("show");
       if (speakerOn) {
-        outputDiv.classList.add("audio-active");
+        output.classList.add("audio-active");
         const fileName = fileMap[estratto] || `${estratto}.mp3`;
         audioPlayer.pause();
         audioPlayer.currentTime = 0;
