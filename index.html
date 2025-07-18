@@ -158,8 +158,12 @@
       margin-top: 10px;
       margin-bottom: 10px;
     }
-    .tempo-button.active { background-color: #5c5eff; }
     .tempo-button:hover { background-color: #7b7dff; }
+    /* ——— Estendi lo stato “acceso” anche in hover ——— */
+.tempo-button.active,
+.tempo-button.active:hover {
+  background-color: #5c5eff;
+}
 
     @media (max-width: 768px) {
       .output { font-size: 6rem; }
