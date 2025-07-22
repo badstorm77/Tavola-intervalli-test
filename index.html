@@ -231,6 +231,13 @@
     let timer = null;
     let context = null;
     const bufferMap = {};
+    // ▶︎ Fallback one-shot per preservare il pitch  
+const audioPlayer = new Audio();
+// Proprietà per Safari/Firefox/Chrome che preservano il pitch al variare di playbackRate
+audioPlayer.preservesPitch       = true;
+audioPlayer.mozPreservesPitch    = true;
+audioPlayer.webkitPreservesPitch = true;
+
     // Stato icona Piano
     let pianoOn = false;
     // Tiene traccia dell’ultimo elemento estratto
@@ -260,7 +267,8 @@
 function initAudioContext() {
   if (context) return;
   context = new (window.AudioContext || window.webkitAudioContext)();
-  // buffer “vuoto” per sbloccare l’audio su iOS
+ context.resume().catch(() => { /* ignora errori */ });
+ // buffer “vuoto” per sbloccare l’audio su iOS
   const src = context.createBufferSource();
   src.buffer = context.createBuffer(1, 1, 22050);
   src.connect(context.destination);
