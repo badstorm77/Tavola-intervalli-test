@@ -218,9 +218,9 @@
     <img src="./piano_ottave.png" id="piano-image" alt="Piano Ottave" class="piano-image" />
     <button onclick="estraiElemento()">Chiedimi</button>
     <div class="bpm-control">
-      <button onclick="modificaBPM(-1)">-</button>
+      <button id="bpm-decrease">-</button>
       <span class="bpm-display" id="bpm">22 bpm</span>
-      <button onclick="modificaBPM(1)">+</button>
+      <button id="bpm-increase">+</button>
       <button class="tempo-button" id="tempo-btn" onclick="toggleTempo()">Chiedimi a tempo</button>
     </div>
   </main>
@@ -401,7 +401,34 @@ Object.values(fileMap).forEach(file => {
       } else if (document.exitFullscreen) {
         document.exitFullscreen();
       }
-    }
+    }// ▶︎ HOLD-TO-REPEAT per + / – BPM
+
+let bpmHoldInterval = null;
+
+const incBtn = document.getElementById('bpm-increase');
+const decBtn = document.getElementById('bpm-decrease');
+
+function startBpmChange(delta) {
+  modificaBPM(delta);
+  bpmHoldInterval = setInterval(() => modificaBPM(delta), 150);
+}
+
+function stopBpmChange() {
+  if (bpmHoldInterval !== null) {
+    clearInterval(bpmHoldInterval);
+    bpmHoldInterval = null;
+  }
+}
+
+['mousedown','touchstart'].forEach(evt => {
+  incBtn.addEventListener(evt, () => startBpmChange(1));
+  decBtn.addEventListener(evt, () => startBpmChange(-1));
+});
+
+['mouseup','mouseleave','touchend','touchcancel'].forEach(evt => {
+  document.addEventListener(evt, stopBpmChange);
+});
+
   </script>
 </body>
 </html>
