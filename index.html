@@ -356,21 +356,26 @@ Object.values(fileMap).forEach(file => {
   // 2. calcoliamo l'intervallo in secondi
   const intervalSec = 60 / bpm;
 
-  // 3. se già abbiamo la durata, settiamo subito il rate
+   // 3. se già abbiamo la durata, settiamo subito il rate con soglia a 22 bpm
   if (durationsMap[fileName]) {
     const dur = durationsMap[fileName];
-    // playbackRate = durata_originale / intervallo desiderato
-    audioPlayer.playbackRate = dur / intervalSec;
+    const rate = bpm > 22
+      ? (dur / intervalSec)  // sopra 22 bpm, accelera per far finire l’audio in 60/bpm s
+      : 1;                   // fino a 22 bpm velocità normale
+    audioPlayer.playbackRate = rate;
     audioPlayer.play().catch(()=>{});
   } else {
-    // altrimenti aspettiamo il caricamento dei metadata
     audioPlayer.addEventListener("loadedmetadata", function handler() {
       const dur = audioPlayer.duration;
-      audioPlayer.playbackRate = dur / intervalSec;
+      const rate = bpm > 22
+        ? (dur / intervalSec)
+        : 1;
+      audioPlayer.playbackRate = rate;
       audioPlayer.play().catch(()=>{});
       audioPlayer.removeEventListener("loadedmetadata", handler);
     });
   }
+
 }
 
     }
