@@ -229,8 +229,8 @@
     let speakerOn = false;
     let bpm = 22;
     let timer = null;
-    let audioPlayer = new Audio();
     let context = null;
+    const bufferMap = {};
     // Stato icona Piano
     let pianoOn = false;
     // Tiene traccia dell’ultimo elemento estratto
@@ -256,17 +256,19 @@
         pianoImg.style.display = "none";
       }
     }
-
-    window.addEventListener("touchstart", () => {
-      if (!context) {
-        context = new (window.AudioContext || window.webkitAudioContext)();
-        const source = context.createBufferSource();
-        source.buffer = context.createBuffer(1, 1, 22050);
-        source.connect(context.destination);
-        source.start(0);
-      }
-    }, { once: true });
-
+    // — Inizializza AudioContext e precarica al primo tocco/click —
+function initAudioContext() {
+  if (context) return;
+  context = new (window.AudioContext || window.webkitAudioContext)();
+  // buffer “vuoto” per sbloccare l’audio su iOS
+  const src = context.createBufferSource();
+  src.buffer = context.createBuffer(1, 1, 22050);
+  src.connect(context.destination);
+  src.start(0);
+  loadBuffers();
+}
+window.addEventListener("touchstart", initAudioContext, { once: true });
+window.addEventListener("click",    initAudioContext, { once: true });
     if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
       const fsBtn = document.getElementById("fullscreen-btn");
       if (fsBtn) fsBtn.style.display = "none";
@@ -311,15 +313,18 @@
   "𝙱♭": "Bb.mp3",
   "𝙱": "B.mp3"
 };
-
-    //  ▷ Precarica le durate di ogni file in secondi
-const durationsMap = {};
-Object.values(fileMap).forEach(file => {
-  const a = new Audio(`audio/${file}`);
-  a.addEventListener('loadedmetadata', () => {
-    durationsMap[file] = a.duration;
+// — Precarica tutti gli AudioBuffer via Web Audio API —
+function loadBuffers() {
+  Object.entries(fileMap).forEach(([symbol, fileName]) => {
+    fetch(`audio/${fileName}`)
+      .then(r => r.arrayBuffer())
+      .then(data => context.decodeAudioData(data))
+      .then(buffer => { bufferMap[symbol] = buffer; })
+      .catch(console.error);
   });
-});
+}
+
+
 
 
     const tempoBtn = document.getElementById("tempo-btn");
@@ -344,40 +349,23 @@ Object.values(fileMap).forEach(file => {
       lastEstratto = estratto;
       output.textContent = estratto;
       output.classList.add("show");
-      if (speakerOn) {
+
+      if (speakerOn && context && bufferMap[estratto]) {
   output.classList.add("audio-active");
 
-  // 1. scegliamo il file
-  const fileName = fileMap[estratto] || `${estratto}.mp3`;
-  audioPlayer.pause();
-  audioPlayer.currentTime = 0;
-  audioPlayer.src = `audio/${fileName}`;
+  // preleviamo il buffer già decodificato
+  const buffer = bufferMap[estratto];
+  const source = context.createBufferSource();
+  source.buffer = buffer;
 
-  // 2. calcoliamo l'intervallo in secondi
+  // calcolo velocità di playback per far rientrare la durata in 60/bpm
   const intervalSec = 60 / bpm;
+  const dur = buffer.duration;
+  const rate = (bpm > 22 && dur > intervalSec) ? dur / intervalSec : 1;
+  source.playbackRate.value = rate;
 
-   // 3. calcoliamo il playbackRate solo se serve
-if (durationsMap[fileName]) {
-  const dur = durationsMap[fileName];
-  // accelera solo se dur > intervalSec E bpm > 22
-  const rate = (bpm > 22 && dur > intervalSec)
-    ? dur / intervalSec
-    : 1;
-  audioPlayer.playbackRate = rate;
-  audioPlayer.play().catch(()=>{});
-} else {
-  audioPlayer.addEventListener("loadedmetadata", function handler() {
-    const dur = audioPlayer.duration;
-    const rate = (bpm > 22 && dur > intervalSec)
-      ? dur / intervalSec
-      : 1;
-    audioPlayer.playbackRate = rate;
-    audioPlayer.play().catch(()=>{});
-    audioPlayer.removeEventListener("loadedmetadata", handler);
-  });
-}
-
-
+  source.connect(context.destination);
+  source.start();
 }
 
     }
