@@ -312,6 +312,15 @@
   "𝙱": "B.mp3"
 };
 
+    //  ▷ Precarica le durate di ogni file in secondi
+const durationsMap = {};
+Object.values(fileMap).forEach(file => {
+  const a = new Audio(`audio/${file}`);
+  a.addEventListener('loadedmetadata', () => {
+    durationsMap[file] = a.duration;
+  });
+});
+
 
     const tempoBtn = document.getElementById("tempo-btn");
     const history = { naturali: [], armonici: [], toniche: [] };
@@ -336,13 +345,34 @@
       output.textContent = estratto;
       output.classList.add("show");
       if (speakerOn) {
-        output.classList.add("audio-active");
-        const fileName = fileMap[estratto] || `${estratto}.mp3`;
-        audioPlayer.pause();
-        audioPlayer.currentTime = 0;
-        audioPlayer.src = `audio/${fileName}`;
-        audioPlayer.play().catch(()=>{});
-      }
+  output.classList.add("audio-active");
+
+  // 1. scegliamo il file
+  const fileName = fileMap[estratto] || `${estratto}.mp3`;
+  audioPlayer.pause();
+  audioPlayer.currentTime = 0;
+  audioPlayer.src = `audio/${fileName}`;
+
+  // 2. calcoliamo l'intervallo in secondi
+  const intervalSec = 60 / bpm;
+
+  // 3. se già abbiamo la durata, settiamo subito il rate
+  if (durationsMap[fileName]) {
+    const dur = durationsMap[fileName];
+    // playbackRate = durata_originale / intervallo desiderato
+    audioPlayer.playbackRate = dur / intervalSec;
+    audioPlayer.play().catch(()=>{});
+  } else {
+    // altrimenti aspettiamo il caricamento dei metadata
+    audioPlayer.addEventListener("loadedmetadata", function handler() {
+      const dur = audioPlayer.duration;
+      audioPlayer.playbackRate = dur / intervalSec;
+      audioPlayer.play().catch(()=>{});
+      audioPlayer.removeEventListener("loadedmetadata", handler);
+    });
+  }
+}
+
     }
 
     function modificaBPM(delta) {
