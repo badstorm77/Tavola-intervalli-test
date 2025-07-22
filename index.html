@@ -229,6 +229,11 @@
     let speakerOn = false;
     let bpm = 22;
     let timer = null;
+    // ▶︎ One-shot player per “Chiedimi” e pitch invariato
+const audioPlayer = new Audio();
+audioPlayer.preservesPitch       = true;
+audioPlayer.mozPreservesPitch    = true;
+audioPlayer.webkitPreservesPitch = true;
     let context = null;
     const bufferMap = {};
     // ▶︎ Fallback one-shot per preservare il pitch  
