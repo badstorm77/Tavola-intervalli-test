@@ -160,6 +160,7 @@
             border-radius: 8px;
             border: none;
             font-family: Arial, sans-serif;
+            touch-action: manipulation;
         }
 
         .bpm-control button:hover {
@@ -534,10 +535,10 @@
         }
     }
 
-    ['mousedown', 'touchstart'].forEach(evt => {
-        incBtn.addEventListener(evt, () => startBpmChange(1));
-        decBtn.addEventListener(evt, () => startBpmChange(-1));
-    });
+    incBtn.addEventListener('mousedown', () => startBpmChange(1));
+    decBtn.addEventListener('mousedown', () => startBpmChange(-1));
+    incBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startBpmChange(1); });
+    decBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startBpmChange(-1); });
 
     ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(evt => {
         document.addEventListener(evt, stopBpmChange);
